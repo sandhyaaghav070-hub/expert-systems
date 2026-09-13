@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Expert Systems — Animated Overview</title>
+<style>
+  :root{
+    --bg:#0A1120;
+    --panel:#121B30;
+    --panel2:#16213B;
+    --line:#26324B;
+    --gold:#E8B15B;
+    --teal:#57D9CB;
+    --coral:#F2735C;
+    --text:#F3F0E8;
+    --text-dim:#93A0B8;
+    --serif: Georgia, 'Times New Roman', Times, serif;
+    --sans: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);}
+  body{
+    font-family:var(--sans);
+    color:var(--text);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(87,217,203,0.08), transparent 45%),
+      radial-gradient(ellipse at 85% 85%, rgba(232,177,91,0.08), transparent 45%),
+      var(--bg);
+  }
+
+  /* subtle circuit grid backdrop */
+  #gridbg{position:absolute;inset:0;opacity:.35;pointer-events:none;}
+
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:5vh 6vw 11vh 6vw;
+    opacity:0; visibility:hidden;
+    transform:translateY(14px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .scene.active{ opacity:1; visibility:visible; transform:translateY(0); }
+
+  .eyebrow{
+    color:var(--teal); font-size:14px; letter-spacing:.14em; font-weight:600;
+    margin-bottom:10px;
+  }
+  h1.hero{
+    font-family:var(--serif); font-weight:700;
+    font-size:clamp(44px,7vw,92px); line-height:1.02; margin:0 0 14px 0;
+    color:var(--text);
+  }
+  h2.scene-title{
+    font-family:var(--serif); font-weight:700;
+    font-size:clamp(26px,3.4vw,42px); margin:0 0 4px 0; color:var(--text);
+    text-align:center;
+  }
+  .scene-sub{
+    font-size:clamp(14px,1.3vw,17px); color:var(--text-dim); text-align:center;
+    max-width:760px; margin:0 auto 3.2vh auto; line-height:1.5;
+  }
+  .reveal{ opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease; }
+  .reveal.show{ opacity:1; transform:translateY(0); }
+
+  /* ---------- SCENE 0 : TITLE ---------- */
+  #scene-0{ text-align:center; }
+  .tagpill{
+    display:inline-block; padding:7px 18px; border:1px solid var(--line);
+    border-radius:999px; color:var(--gold); font-size:13px; letter-spacing:.08em;
+    margin-bottom:22px; background:rgba(232,177,91,0.06);
+  }
+  .hero-sub{ font-size:clamp(15px,1.6vw,19px); color:var(--text-dim); max-width:640px; margin:10px auto 0 auto; }
+  .hero-list{
+    display:flex; gap:28px; justify-content:center; margin-top:44px; flex-wrap:wrap;
+  }
+  .hero-list span{
+    font-size:13px; color:var(--text-dim); border-left:2px solid var(--teal); padding-left:10px;
+  }
+
+  /* ---------- SCENE 1 : IS vs ES ---------- */
+  .venn-wrap{ display:flex; align-items:center; justify-content:center; gap:6vw; margin-bottom:2.6vh; flex-wrap:wrap;}
+  .venn-svg{ width:min(360px,34vw); height:min(360px,34vw); }
+  .compare-table{ width:100%; max-width:980px; border-collapse:collapse; }
+  .compare-table th{
+    font-family:var(--serif); font-weight:700; font-size:15px; text-align:left;
+    padding:10px 16px; color:var(--gold); border-bottom:1px solid var(--line);
+  }
+  .compare-table td{
+    padding:11px 16px; font-size:14px; color:var(--text); border-bottom:1px solid var(--line);
+    vertical-align:top; line-height:1.45;
+  }
+  .compare-table td:first-child{ color:var(--text-dim); font-size:13px; white-space:nowrap; }
+  .compare-table tr td:nth-child(2){ border-right:1px dashed var(--line); }
+
+  /* ---------- SCENE 2 : ARCHITECTURE ---------- */
+  .diagram{ position:relative; width:min(980px,90vw); aspect-ratio:16/8.6; margin-top:1vh; }
+  .diagram svg.wires{ position:absolute; inset:0; width:100%; height:100%; }
+  .node{
+    position:absolute; transform:translate(-50%,-50%);
+    background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    padding:12px 16px; text-align:center; width:168px;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  .node.core{ background:linear-gradient(160deg,#23345C,#182647); border-color:var(--teal); width:190px; }
+  .node .t{ font-family:var(--serif); font-weight:700; font-size:14.5px; color:var(--text); }
+  .node .d{ font-size:11.5px; color:var(--text-dim); margin-top:4px; line-height:1.35; }
+  .wire-path{ fill:none; stroke:var(--line); stroke-width:.6; }
+  .wire-path.on{ stroke:var(--teal); }
+
+  /* ---------- SCENE 3 : ROLES ---------- */
+  .roles-grid{
+    display:grid; grid-template-columns:repeat(3,minmax(200px,1fr)); gap:18px;
+    width:100%; max-width:1020px;
+  }
+  .role-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 18px 16px;
+  }
+  .role-icon{
+    width:34px;height:34px;border-radius:9px; display:flex;align-items:center;justify-content:center;
+    background:rgba(87,217,203,.12); color:var(--teal); margin-bottom:10px;
+  }
+  .role-card .rt{ font-family:var(--serif); font-weight:700; font-size:16px; margin-bottom:5px;}
+  .role-card .rd{ font-size:12.8px; color:var(--text-dim); line-height:1.45;}
+
+  /* ---------- SCENE 4 : KNOWLEDGE ACQUISITION ---------- */
+  .cycle-wrap{ position:relative; width:min(620px,72vw); aspect-ratio:1/1; margin:0 auto; }
+  .cycle-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .cnode{
+    position:absolute; transform:translate(-50%,-50%); text-align:center; width:150px;
+  }
+  .cnode .dot{
+    width:14px;height:14px;border-radius:50%; background:var(--gold); margin:0 auto 8px auto;
+    box-shadow:0 0 0 5px rgba(232,177,91,.15);
+  }
+  .cnode .t{ font-family:var(--serif); font-weight:700; font-size:13.5px; }
+  .cnode .d{ font-size:11px; color:var(--text-dim); margin-top:3px; line-height:1.35;}
+  .pulse{
+    offset-rotate:0deg; animation:travel 7s linear infinite;
+    width:10px;height:10px;border-radius:50%;background:var(--teal);
+    box-shadow:0 0 12px 3px rgba(87,217,203,.7);
+    position:absolute; top:0; left:0;
+  }
+  @keyframes travel{ from{ offset-distance:0%; } to{ offset-distance:100%; } }
+
+  /* ---------- SCENE 5 : SHELLS / META ---------- */
+  .split{ display:flex; gap:26px; width:100%; max-width:1040px; flex-wrap:wrap; justify-content:center;}
+  .split-panel{
+    flex:1; min-width:320px; background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:26px 26px 22px;
+  }
+  .split-panel h3{ font-family:var(--serif); font-size:19px; margin:6px 0 10px 0; }
+  .split-panel.left h3{ color:var(--gold); }
+  .split-panel.right h3{ color:var(--teal); }
+  .split-panel p{ font-size:13.5px; color:var(--text-dim); line-height:1.55; margin:0 0 12px 0;}
+  .chiprow{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{
+    font-size:11.5px; padding:5px 11px; border-radius:999px; border:1px solid var(--line);
+    color:var(--text-dim);
+  }
+  .shell-visual{ display:flex; align-items:center; gap:14px; margin:14px 0 18px 0;}
+  .box-empty, .box-filled{
+    width:64px;height:48px;border-radius:8px;border:1.5px dashed var(--text-dim);
+    display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-dim);
+  }
+  .box-filled{ border-style:solid; border-color:var(--gold); background:rgba(232,177,91,.12); color:var(--gold);}
+  .arrow-mini{ color:var(--text-dim); font-size:20px; }
+  .meta-visual{ display:flex; flex-direction:column; align-items:center; gap:10px; margin:14px 0 18px 0;}
+  .meta-hub{
+    width:120px; padding:8px; text-align:center; font-size:11.5px; border-radius:10px;
+    background:rgba(87,217,203,.14); border:1px solid var(--teal); color:var(--teal);
+  }
+  .meta-row{ display:flex; gap:10px; }
+  .meta-leaf{
+    width:78px; padding:6px; text-align:center; font-size:10px; border-radius:8px;
+    background:var(--panel2); border:1px solid var(--line); color:var(--text-dim);
+  }
+
+  /* ---------- SCENE 6 : SUMMARY ---------- */
+  .summary-list{ list-style:none; padding:0; margin:0; width:100%; max-width:760px; }
+  .summary-list li{
+    display:flex; gap:14px; padding:12px 0; border-bottom:1px solid var(--line);
+    font-size:15.5px; line-height:1.5;
+  }
+  .summary-list li .num{
+    font-family:var(--serif); color:var(--gold); font-weight:700; min-width:26px;
+  }
+  .closing{ margin-top:34px; font-family:var(--serif); font-size:26px; color:var(--text-dim); }
+
+  /* ---------- CONTROLS ---------- */
+  #controls{
+    position:absolute; left:0; right:0; bottom:0; height:9vh; min-height:66px;
+    display:flex; align-items:center; gap:16px; padding:0 5vw;
+    background:linear-gradient(0deg, rgba(6,10,20,.95), rgba(6,10,20,0));
+  }
+  #playbtn{
+    width:42px;height:42px;border-radius:50%; border:1px solid var(--line); background:var(--panel2);
+    color:var(--text); cursor:pointer; display:flex;align-items:center;justify-content:center; flex:none;
+  }
+  #playbtn:hover{ border-color:var(--teal); }
+  .navbtn{
+    background:none;border:none; color:var(--text-dim); cursor:pointer; font-size:20px; padding:4px 8px;
+  }
+  .navbtn:hover{ color:var(--text); }
+  #track{ flex:1; display:flex; gap:6px; align-items:center; }
+  .seg{
+    flex:1; height:4px; background:var(--line); border-radius:3px; overflow:hidden; cursor:pointer;
+    position:relative;
+  }
+  .seg-fill{ position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--teal); }
+  .seg-fill.filled{ width:100%; }
+  .seg-fill.animating{ animation-name:fillAnim; animation-timing-function:linear; animation-fill-mode:forwards; }
+  @keyframes fillAnim{ from{width:0%;} to{width:100%;} }
+  #scenelabel{ font-size:12px; color:var(--text-dim); min-width:96px; text-align:right; flex:none; }
+
+  #hint{
+    position:absolute; top:22px; right:28px; font-size:12px; color:var(--text-dim);
+    border:1px solid var(--line); padding:6px 12px; border-radius:999px; opacity:0; transition:opacity .6s;
+    background:rgba(18,27,48,.7);
+  }
+  #hint.show{ opacity:1; }
+  #brand{ position:absolute; top:22px; left:28px; font-size:12px; letter-spacing:.1em; color:var(--text-dim); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gridbg"></canvas>
+  <div id="brand">EXPERT SYSTEMS · AI PRACTICAL</div>
+  <div id="hint">Space = play/pause · ← → = navigate</div>
+
+  <!-- SCENE 0 -->
+  <section class="scene" id="scene-0">
+    <div class="tagpill reveal" data-d="0">ARTIFICIAL INTELLIGENCE</div>
+    <h1 class="hero reveal" data-d="150">Expert Systems</h1>
+    <p class="hero-sub reveal" data-d="350">How machines capture human expertise and reason with it — architecture, roles, knowledge acquisition, and shells.</p>
+    <div class="hero-list reveal" data-d="600">
+      <span>Intelligent vs Expert Systems</span>
+      <span>Architecture</span>
+      <span>Roles</span>
+      <span>Knowledge Acquisition</span>
+      <span>Meta-ES &amp; Shells</span>
+    </div>
+  </section>
+
+  <!-- SCENE 1 -->
+  <section class="scene" id="scene-1">
+    <div class="eyebrow reveal" data-d="0">01 · FOUNDATIONS</div>
+    <h2 class="scene-title reveal" data-d="0">Intelligent System vs Expert System</h2>
+    <p class="scene-sub reveal" data-d="150">An expert system is one particular, narrow-domain realisation of the broader idea of an intelligent system.</p>
+
+    <div class="venn-wrap reveal" data-d="300">
+      <svg class="venn-svg" viewBox="0 0 220 220">
+        <circle id="v-outer" cx="110" cy="110" r="95" fill="rgba(87,217,203,0.08)" stroke="#57D9CB" stroke-width="2"
+          stroke-dasharray="600" stroke-dashoffset="600"/>
+        <circle id="v-inner" cx="110" cy="128" r="48" fill="rgba(232,177,91,0.16)" stroke="#E8B15B" stroke-width="2"
+          stroke-dasharray="320" stroke-dashoffset="320"/>
+        <text x="110" y="44" text-anchor="middle" fill="#57D9CB" font-size="13" font-family="Georgia,serif">Intelligent Systems</text>
+        <text x="110" y="130" text-anchor="middle" fill="#E8B15B" font-size="12" font-family="Georgia,serif">Expert</text>
+        <text x="110" y="146" text-anchor="middle" fill="#E8B15B" font-size="12" font-family="Georgia,serif">Systems</text>
+      </svg>
+    </div>
+
+    <table class="compare-table reveal" data-d="500">
+      <tr><th>Aspect</th><th>Intelligent System</th><th>Expert System</th></tr>
+      <tr><td>Definition</td><td>Any system that perceives, reasons and acts to achieve goals across varied tasks</td><td>Emulates the decision-making of a human expert in one specific domain</td></tr>
+      <tr><td>Scope</td><td>General-purpose: perception, learning, planning, robotics, language</td><td>Narrow: one well-defined problem, e.g. diagnosis or configuration</td></tr>
+      <tr><td>Core technique</td><td>Search, learning, neural networks, probabilistic reasoning</td><td>IF&ndash;THEN rules applied over an explicit knowledge base</td></tr>
+      <tr><td>Learning</td><td>Can adapt and improve from data and experience</td><td>Knowledge is hand-engineered; it does not learn on its own</td></tr>
+      <tr><td>Example</td><td>Self-driving car, virtual assistant</td><td>MYCIN (medical diagnosis), DENDRAL (chemistry)</td></tr>
+    </table>
+  </section>
+
+  <!-- SCENE 2 -->
+  <section class="scene" id="scene-2">
+    <div class="eyebrow reveal" data-d="0">02 · STRUCTURE</div>
+    <h2 class="scene-title reveal" data-d="0">Architecture of an Expert System</h2>
+    <p class="scene-sub reveal" data-d="150">Five components work together around a central reasoning engine.</p>
+
+    <div class="diagram">
+      <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="wire-path" id="w1" d="M50,50 L18,20" />
+        <path class="wire-path" id="w2" d="M50,50 L18,80" />
+        <path class="wire-path" id="w3" d="M50,50 L82,20" />
+        <path class="wire-path" id="w4" d="M50,50 L82,80" />
+        <path class="wire-path" id="w5" d="M50,50 L50,94" />
+      </svg>
+      <div class="node reveal" data-d="1600" style="left:18%; top:20%;">
+        <div class="t">Knowledge Base</div>
+        <div class="d">Domain facts &amp; IF&ndash;THEN rules</div>
+      </div>
+      <div class="node reveal" data-d="1900" style="left:18%; top:80%;">
+        <div class="t">Working Memory</div>
+        <div class="d">Facts about the current case</div>
+      </div>
+      <div class="node reveal" data-d="2200" style="left:82%; top:20%;">
+        <div class="t">User Interface</div>
+        <div class="d">Dialogue with the user</div>
+      </div>
+      <div class="node reveal" data-d="2500" style="left:82%; top:80%;">
+        <div class="t">Explanation Facility</div>
+        <div class="d">Justifies &amp; traces reasoning</div>
+      </div>
+      <div class="node reveal" data-d="2800" style="left:50%; top:94%;">
+        <div class="t">Knowledge Acquisition</div>
+        <div class="d">Adds / updates expert knowledge</div>
+      </div>
+      <div class="node core reveal" data-d="900" style="left:50%; top:50%;">
+        <div class="t">Inference Engine</div>
+        <div class="d">Matches rules to facts &amp; draws conclusions</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 3 -->
+  <section class="scene" id="scene-3">
+    <div class="eyebrow reveal" data-d="0">03 · APPLICATION</div>
+    <h2 class="scene-title reveal" data-d="0">Roles of Expert Systems</h2>
+    <p class="scene-sub reveal" data-d="150">The same architecture is reused across very different jobs.</p>
+
+    <div class="roles-grid">
+      <div class="role-card reveal" data-d="350">
+        <div class="role-icon">◎</div>
+        <div class="rt">Diagnosis</div>
+        <div class="rd">Identify the cause of a problem from observed symptoms — e.g. medical or equipment-fault diagnosis.</div>
+      </div>
+      <div class="role-card reveal" data-d="500">
+        <div class="role-icon">↝</div>
+        <div class="rt">Prediction</div>
+        <div class="rd">Forecast likely outcomes from current data — e.g. weather or financial-risk forecasting.</div>
+      </div>
+      <div class="role-card reveal" data-d="650">
+        <div class="role-icon">▤</div>
+        <div class="rt">Planning &amp; Scheduling</div>
+        <div class="rd">Work out a sequence of actions to reach a goal — e.g. production or logistics scheduling.</div>
+      </div>
+      <div class="role-card reveal" data-d="800">
+        <div class="role-icon">◉</div>
+        <div class="rt">Monitoring</div>
+        <div class="rd">Continuously compare observations to expected behaviour and flag anomalies in real time.</div>
+      </div>
+      <div class="role-card reveal" data-d="950">
+        <div class="role-icon">≋</div>
+        <div class="rt">Interpretation</div>
+        <div class="rd">Make sense of raw signals or data — e.g. sonar signal or image interpretation.</div>
+      </div>
+      <div class="role-card reveal" data-d="1100">
+        <div class="role-icon">✎</div>
+        <div class="rt">Instruction &amp; Training</div>
+        <div class="rd">Diagnose a learner's understanding and tutor them accordingly — intelligent tutoring systems.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 4 -->
+  <section class="scene" id="scene-4">
+    <div class="eyebrow reveal" data-d="0">04 · BUILDING THE KB</div>
+    <h2 class="scene-title reveal" data-d="0">Knowledge Acquisition</h2>
+    <p class="scene-sub reveal" data-d="150">The iterative process of turning human expertise into machine-usable rules.</p>
+
+    <div class="cycle-wrap reveal" data-d="350">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 z" fill="#3A4A6B"/>
+          </marker>
+        </defs>
+        <path id="cyclepath" d="M 50 12 A 38 38 0 1 1 49.9 12" fill="none" stroke="#3A4A6B" stroke-width="1" marker-end="url(#arrow)"/>
+        <circle class="pulse" style="offset-path:path('M 50 12 A 38 38 0 1 1 49.9 12');"></circle>
+      </svg>
+      <div class="cnode" style="left:50%; top:12%;"><div class="dot"></div><div class="t">Domain Expert</div><div class="d">Holds the tacit expertise</div></div>
+      <div class="cnode" style="left:86%; top:37%;"><div class="dot"></div><div class="t">Knowledge Engineer</div><div class="d">Elicits &amp; structures it</div></div>
+      <div class="cnode" style="left:73%; top:82%;"><div class="dot"></div><div class="t">Elicitation</div><div class="d">Interviews, observation, protocol analysis</div></div>
+      <div class="cnode" style="left:27%; top:82%;"><div class="dot"></div><div class="t">Encode Rules</div><div class="d">Build the knowledge base</div></div>
+      <div class="cnode" style="left:14%; top:37%;"><div class="dot"></div><div class="t">Validate &amp; Refine</div><div class="d">Test against real cases, loop back</div></div>
+    </div>
+  </section>
+
+  <!-- SCENE 5 -->
+  <section class="scene" id="scene-5">
+    <div class="eyebrow reveal" data-d="0">05 · TOOLS</div>
+    <h2 class="scene-title reveal" data-d="0">Expert System Shells &amp; Meta-Expert Systems</h2>
+    <p class="scene-sub reveal" data-d="150">Two ways of reusing expert-system machinery beyond a single application.</p>
+
+    <div class="split">
+      <div class="split-panel left reveal" data-d="350">
+        <h3>Expert System Shell</h3>
+        <div class="shell-visual">
+          <div class="box-empty">empty<br>shell</div>
+          <div class="arrow-mini">+</div>
+          <div class="box-empty">domain<br>rules</div>
+          <div class="arrow-mini">&rarr;</div>
+          <div class="box-filled">working<br>ES</div>
+        </div>
+        <p>A ready-made framework with an inference engine, interface and explanation facility already built &mdash; but <em>no</em> domain knowledge. Developers plug in their own rules to build a new expert system quickly.</p>
+        <div class="chiprow">
+          <div class="chip">CLIPS</div>
+          <div class="chip">JESS</div>
+          <div class="chip">EMYCIN (from MYCIN)</div>
+        </div>
+      </div>
+      <div class="split-panel right reveal" data-d="550">
+        <h3>Meta-Expert System</h3>
+        <div class="meta-visual">
+          <div class="meta-hub">Meta-ES: which specialist should handle this?</div>
+          <div class="meta-row">
+            <div class="meta-leaf">Diagnosis ES</div>
+            <div class="meta-leaf">Planning ES</div>
+            <div class="meta-leaf">Monitoring ES</div>
+          </div>
+        </div>
+        <p>Its "domain" is expertise itself &mdash; it selects, coordinates, or arbitrates between several specialist expert systems to answer a single query.</p>
+        <div class="chiprow">
+          <div class="chip">Coordinates specialists</div>
+          <div class="chip">Resolves conflicting advice</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 6 -->
+  <section class="scene" id="scene-6">
+    <div class="eyebrow reveal" data-d="0">06 · RECAP</div>
+    <h2 class="scene-title reveal" data-d="0">Key Takeaways</h2>
+    <ul class="summary-list">
+      <li class="reveal" data-d="300"><span class="num">01</span><span>An expert system is a narrow, rule-based realisation of the broader idea of an intelligent system.</span></li>
+      <li class="reveal" data-d="600"><span class="num">02</span><span>Its architecture centres on an inference engine that reasons over a knowledge base and working memory, mediated by a user interface and explanation facility.</span></li>
+      <li class="reveal" data-d="900"><span class="num">03</span><span>Expert systems play many roles: diagnosis, prediction, planning, monitoring, interpretation, and training.</span></li>
+      <li class="reveal" data-d="1200"><span class="num">04</span><span>Knowledge acquisition is the iterative process of eliciting expertise from a human expert and encoding it as rules.</span></li>
+      <li class="reveal" data-d="1500"><span class="num">05</span><span>Shells provide reusable machinery for building new expert systems; meta-expert systems coordinate several specialists at once.</span></li>
+    </ul>
+    <div class="closing reveal" data-d="1900">Questions?</div>
+  </section>
+
+  <div id="controls">
+    <button class="navbtn" id="prevbtn" title="Previous">&#10094;</button>
+    <button id="playbtn" title="Play / Pause">
+      <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="icon-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+    </button>
+    <div id="track"></div>
+    <div id="scenelabel">Scene 1 / 7</div>
+    <button class="navbtn" id="nextbtn" title="Next">&#10095;</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var scenes = ['scene-0','scene-1','scene-2','scene-3','scene-4','scene-5','scene-6'];
+  var durations = [6500, 15000, 17000, 15000, 15000, 14000, 11000]; // ms per scene
+  var titles = ['Title','Intelligent vs Expert','Architecture','Roles','Knowledge Acquisition','Shells & Meta-ES','Recap'];
+  var current = 0;
+  var playing = true;
+  var advanceTimer = null;
+
+  var track = document.getElementById('track');
+  var fills = [];
+  scenes.forEach(function(id, i){
+    var seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.addEventListener('click', function(){ goTo(i); });
+    var fill = document.createElement('div');
+    fill.className = 'seg-fill';
+    seg.appendChild(fill);
+    track.appendChild(seg);
+    fills.push(fill);
+  });
+
+  var sceneLabel = document.getElementById('scenelabel');
+  var playbtn = document.getElementById('playbtn');
+  var iconPlay = document.getElementById('icon-play');
+  var iconPause = document.getElementById('icon-pause');
+  var hint = document.getElementById('hint');
+
+  function clearReveals(id){
+    var el = document.getElementById(id);
+    var items = el.querySelectorAll('.reveal');
+    items.forEach(function(it){ it.classList.remove('show'); });
+  }
+
+  function triggerReveals(id){
+    var el = document.getElementById(id);
+    var items = el.querySelectorAll('.reveal');
+    items.forEach(function(it){
+      var delay = parseInt(it.getAttribute('data-d') || '0', 10);
+      setTimeout(function(){ it.classList.add('show'); }, delay);
+    });
+    // re-trigger venn draw-in on scene 1
+    if(id === 'scene-1'){
+      var outer = document.getElementById('v-outer');
+      var inner = document.getElementById('v-inner');
+      if(outer && inner){
+        outer.style.transition = 'none'; inner.style.transition = 'none';
+        outer.style.strokeDashoffset = '600'; inner.style.strokeDashoffset = '320';
+        void outer.getBoundingClientRect();
+        outer.style.transition = 'stroke-dashoffset 1.3s ease 0.3s';
+        inner.style.transition = 'stroke-dashoffset 1.1s ease 0.9s';
+        requestAnimationFrame(function(){
+          outer.style.strokeDashoffset = '0';
+          inner.style.strokeDashoffset = '0';
+        });
+      }
+    }
+    if(id === 'scene-2'){
+      ['w1','w2','w3','w4','w5'].forEach(function(wid, idx){
+        var w = document.getElementById(wid);
+        if(!w) return;
+        var len = 55;
+        w.style.strokeDasharray = len;
+        w.style.strokeDashoffset = len;
+        w.style.transition = 'none';
+        void w.getBoundingClientRect();
+        setTimeout(function(){
+          w.style.transition = 'stroke-dashoffset .7s ease';
+          w.style.strokeDashoffset = '0';
+          w.classList.add('on');
+        }, 700 + idx*260);
+      });
+    }
+  }
+
+  function setSegState(i){
+    fills.forEach(function(f, idx){
+      f.classList.remove('animating','filled');
+      f.style.animationDuration = '';
+      if(idx < i){ f.classList.add('filled'); f.style.width = '100%'; }
+      else if(idx > i){ f.style.width = '0%'; }
+    });
+  }
+
+  function startFill(i){
+    var f = fills[i];
+    f.style.width = '0%';
+    f.classList.remove('filled');
+    // restart animation
+    f.style.animation = 'none';
+    void f.offsetWidth;
+    f.style.animationName = 'fillAnim';
+    f.style.animationDuration = durations[i] + 'ms';
+    f.style.animationTimingFunction = 'linear';
+    f.style.animationFillMode = 'forwards';
+    f.style.animationPlayState = playing ? 'running' : 'paused';
+    f.onanimationend = function(){ next(); };
+  }
+
+  function goTo(i, keepPlayState){
+    if(i < 0) i = scenes.length - 1;
+    if(i >= scenes.length) i = 0;
+    document.getElementById(scenes[current]).classList.remove('active');
+    clearReveals(scenes[current]);
+    current = i;
+    var el = document.getElementById(scenes[current]);
+    el.classList.add('active');
+    sceneLabel.textContent = 'Scene ' + (current+1) + ' / ' + scenes.length;
+    triggerReveals(scenes[current]);
+    setSegState(current);
+    startFill(current);
+  }
+
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  function setPlaying(p){
+    playing = p;
+    iconPlay.style.display = p ? 'none' : 'block';
+    iconPause.style.display = p ? 'block' : 'none';
+    var f = fills[current];
+    if(f) f.style.animationPlayState = p ? 'running' : 'paused';
+  }
+
+  playbtn.addEventListener('click', function(){ setPlaying(!playing); });
+  document.getElementById('nextbtn').addEventListener('click', function(){ next(); });
+  document.getElementById('prevbtn').addEventListener('click', function(){ prev(); });
+
+  document.addEventListener('keydown', function(e){
+    if(e.code === 'Space'){ e.preventDefault(); setPlaying(!playing); }
+    else if(e.code === 'ArrowRight'){ next(); }
+    else if(e.code === 'ArrowLeft'){ prev(); }
+  });
+
+  // simple background canvas circuit grid
+  var canvas = document.getElementById('gridbg');
+  function sizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  }
+  function draw(){
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+    ctx.lineWidth = 1;
+    var step = 64;
+    for(var x=0; x<canvas.width; x+=step){
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+    }
+    for(var y=0; y<canvas.height; y+=step){
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+    }
+  }
+  window.addEventListener('resize', sizeCanvas);
+  sizeCanvas();
+
+  // init
+  goTo(0);
+  setTimeout(function(){ hint.classList.add('show'); }, 800);
+  setTimeout(function(){ hint.classList.remove('show'); }, 5500);
+})();
+</script>
+</body>
+</html>
